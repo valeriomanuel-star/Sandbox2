@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Private Portal</title>
-
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="manifest" href="manifest.json">
-
     <style>
         body {
             font-family: -apple-system, system-ui, sans-serif;
@@ -18,7 +15,6 @@
             margin: 0;
             background-color: #f8f9fa;
         }
-
         #lock-screen, #app-content {
             text-align: center;
             background: white;
@@ -28,9 +24,7 @@
             width: 85%;
             max-width: 350px;
         }
-
         #app-content { display: none; }
-
         input[type="password"] {
             width: 100%;
             padding: 15px;
@@ -40,8 +34,8 @@
             font-size: 18px;
             text-align: center;
             outline: none;
+            box-sizing: border-box;
         }
-
         button {
             background-color: #007AFF;
             color: white;
@@ -53,22 +47,21 @@
             width: 100%;
             cursor: pointer;
         }
-
         .snap-btn {
             background-color: #FFFC00;
             color: black;
             margin-top: 20px;
+            display: block;
+            text-decoration: none;
+            padding: 15px;
+            border-radius: 12px;
+            font-weight: bold;
         }
-
         #error {
             color: #FF3B30;
             font-size: 14px;
             display: none;
             margin-top: 10px;
-        }
-
-        a {
-            text-decoration: none;
         }
     </style>
 </head>
@@ -83,14 +76,8 @@
 
     <div id="app-content">
         <h2>Welcome Back</h2>
-
-        <a href="https://accounts.snapchat.com/v2/login" target="_blank">
-            <button class="snap-btn">Open Snapchat Web</button>
-        </a>
-
-        <a href="snapchat://">
-            <button style="margin-top:10px; background-color: #eee; color: #333;">Open Snapchat App</button>
-        </a>
+        <a href="[https://accounts.snapchat.com/v2/login](https://accounts.snapchat.com/v2/login)" target="_blank" class="snap-btn">Open Snapchat Web</a>
+        <a href="snapchat://" style="display:block; margin-top:10px; color:#666; text-decoration:none; font-size:14px;">Open Snapchat App</a>
     </div>
 
     <script>
@@ -98,32 +85,18 @@
 
         function checkAccess() {
             const code = document.getElementById('passcode').value;
-            const lockScreen = document.getElementById('lock-screen');
-            const appContent = document.getElementById('app-content');
-            const errorMsg = document.getElementById('error');
-
             if (code === secret) {
-                lockScreen.style.display = 'none';
-                appContent.style.display = 'block';
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('app-content').style.display = 'block';
             } else {
-                errorMsg.style.display = 'block';
+                document.getElementById('error').style.display = 'block';
                 document.getElementById('passcode').value = '';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const input = document.getElementById('passcode');
-            const button = document.getElementById('unlockBtn');
-
-            input.focus();
-
-            button.addEventListener('click', checkAccess);
-
-            input.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    checkAccess();
-                }
-            });
+        document.getElementById('unlockBtn').addEventListener('click', checkAccess);
+        document.getElementById('passcode').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') checkAccess();
         });
     </script>
 </body>
