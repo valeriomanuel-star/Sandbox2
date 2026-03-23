@@ -15,16 +15,27 @@ if (code === secret) {
 
 }
 
-// Auto focus input
-window.onload = () => {
-document.getElementById('passcode').focus();
-};
+// Make function available globally (fixes iPhone issues)
+window.checkAccess = checkAccess;
 
-// Enter key support
+// Wait for page to load
 document.addEventListener('DOMContentLoaded', () => {
-document.getElementById('passcode').addEventListener('keypress', function(e) {
-if (e.key === 'Enter') {
-checkAccess();
-}
+const input = document.getElementById('passcode');
+const button = document.getElementById('unlockBtn');
+
+```
+// Focus input
+input.focus();
+
+// Button click
+button.addEventListener('click', checkAccess);
+
+// Enter key
+input.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        checkAccess();
+    }
 });
+```
+
 });
