@@ -1,107 +1,105 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Portal</title>
-    
-    <link rel="manifest" href="manifest.json">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <style>
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa;
-        }
+```
+<!-- iPhone behavior fix -->
+<meta name="apple-mobile-web-app-capable" content="no">
 
-        #lock-screen, #app-content {
-            text-align: center;
-            background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-            width: 85%;
-            max-width: 350px;
-        }
+<!-- Link manifest -->
+<link rel="manifest" href="manifest.json">
 
-        #app-content { display: none; }
+<!-- Link external JS -->
+<script defer src="app.js"></script>
 
-        input[type="password"] {
-            width: 100%;
-            padding: 15px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 18px;
-            outline: none;
-            text-align: center;
-        }
+<style>
+    body {
+        font-family: -apple-system, system-ui, sans-serif;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-color: #f8f9fa;
+    }
 
-        button {
-            background-color: #007AFF;
-            color: white;
-            border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-        }
+    #lock-screen, #app-content {
+        text-align: center;
+        background: white;
+        padding: 30px;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        width: 85%;
+        max-width: 350px;
+    }
 
-        .snap-btn {
-            background-color: #FFFC00;
-            color: black;
-            text-decoration: none;
-            display: block;
-            padding: 18px;
-            border-radius: 15px;
-            font-weight: bold;
-            margin-top: 20px;
-            box-shadow: 0 4px 10px rgba(255, 252, 0, 0.3);
-        }
+    #app-content { display: none; }
 
-        #error { color: #FF3B30; font-size: 14px; margin-top: 10px; display: none; }
-    </style>
+    input[type="password"] {
+        width: 100%;
+        padding: 15px;
+        margin: 15px 0;
+        border: 1px solid #ddd;
+        border-radius: 12px;
+        font-size: 18px;
+        text-align: center;
+    }
+
+    button {
+        background-color: #007AFF;
+        color: white;
+        border: none;
+        padding: 15px;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 600;
+        width: 100%;
+        cursor: pointer;
+    }
+
+    .snap-btn {
+        background-color: #FFFC00;
+        color: black;
+        margin-top: 20px;
+    }
+
+    #error {
+        color: #FF3B30;
+        font-size: 14px;
+        display: none;
+    }
+</style>
+```
+
 </head>
 <body>
 
-    <div id="lock-screen">
-        <h2>Enter Access Code</h2>
-        <input type="password" id="passcode" placeholder="••••" inputmode="numeric">
-        <button onclick="checkAccess()">Unlock</button>
-        <p id="error">Incorrect Code</p>
-    </div>
+```
+<div id="lock-screen">
+    <h2>Enter Access Code</h2>
+    <input type="password" id="passcode" placeholder="••••" inputmode="numeric">
+    <button onclick="checkAccess()">Unlock</button>
+    <p id="error">Incorrect Code</p>
+</div>
 
-    <div id="app-content">
-        <h2>Welcome Back</h2>
-        <a href="https://accounts.snapchat.com/v2/login" class="snap-btn">Open Snapchat</a>
-    </div>
+<div id="app-content">
+    <h2>Welcome Back</h2>
 
-    <script>
-        function checkAccess() {
-            const code = document.getElementById('passcode').value;
-            const secret = "1234"; // Replace with your actual code
+    <!-- Opens Snapchat in Safari -->
+    <a href="https://accounts.snapchat.com/v2/login" target="_blank">
+        <button class="snap-btn">Open Snapchat</button>
+    </a>
 
-            if (code === secret) {
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-            } else {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('passcode').value = '';
-            }
-        }
+    <!-- Optional app open -->
+    <a href="snapchat://">
+        <button style="margin-top:10px;">Open Snapchat App</button>
+    </a>
+</div>
+```
 
-        // Trigger unlock on "Enter"
-        document.getElementById('passcode').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkAccess();
-        });
-    </script>
 </body>
 </html>
