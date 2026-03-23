@@ -2,9 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Portal</title>
-    <meta name="apple-mobile-web-app-capable" content="yes">
+
+    <!-- Prevent iPhone app sandbox issues -->
+    <meta name="apple-mobile-web-app-capable" content="no">
+
     <style>
         body {
             font-family: -apple-system, system-ui, sans-serif;
@@ -15,6 +18,7 @@
             margin: 0;
             background-color: #f8f9fa;
         }
+
         #lock-screen, #app-content {
             text-align: center;
             background: white;
@@ -24,7 +28,9 @@
             width: 85%;
             max-width: 350px;
         }
+
         #app-content { display: none; }
+
         input[type="password"] {
             width: 100%;
             padding: 15px;
@@ -34,8 +40,8 @@
             font-size: 18px;
             text-align: center;
             outline: none;
-            box-sizing: border-box;
         }
+
         button {
             background-color: #007AFF;
             color: white;
@@ -47,6 +53,7 @@
             width: 100%;
             cursor: pointer;
         }
+
         .snap-btn {
             background-color: #FFFC00;
             color: black;
@@ -57,6 +64,7 @@
             border-radius: 12px;
             font-weight: bold;
         }
+
         #error {
             color: #FF3B30;
             font-size: 14px;
@@ -76,8 +84,16 @@
 
     <div id="app-content">
         <h2>Welcome Back</h2>
-        <a href="https://accounts.snapchat.com/v2/login" target="_blank" class="snap-btn">Open Snapchat Web</a>
-        <a href="snapchat://" style="display:block; margin-top:10px; color:#666; text-decoration:none; font-size:14px;">Open Snapchat App</a>
+
+        <!-- Opens Snapchat web -->
+        <a href="https://accounts.snapchat.com/v2/login" target="_blank" class="snap-btn">
+            Open Snapchat Web
+        </a>
+
+        <!-- Optional: opens Snapchat app -->
+        <a href="snapchat://" style="display:block; margin-top:10px; color:#666; text-decoration:none; font-size:14px;">
+            Open Snapchat App
+        </a>
     </div>
 
     <script>
@@ -94,10 +110,19 @@
             }
         }
 
+        // Button click
         document.getElementById('unlockBtn').addEventListener('click', checkAccess);
+
+        // Enter key support
         document.getElementById('passcode').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkAccess();
         });
+
+        // Auto focus input on load
+        window.onload = () => {
+            document.getElementById('passcode').focus();
+        };
     </script>
+
 </body>
 </html>
