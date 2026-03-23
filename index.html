@@ -71,6 +71,16 @@
             padding: 15px;
             border-radius: 10px;
         }
+        /* This helps the desktop version scale better on your mobile screen */
+@media screen and (max-width: 768px) {
+    iframe {
+        width: 100vw;
+        height: 100vh;
+        transform: scale(0.8); /* Adjust this number to zoom in or out */
+        transform-origin: 0 0;
+    }
+}
+
     </style>
     <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
