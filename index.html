@@ -7,13 +7,13 @@
     <title>Private Portal</title>
 
 ```
-<!-- iPhone behavior fix -->
+<!-- Prevent buggy iPhone app mode -->
 <meta name="apple-mobile-web-app-capable" content="no">
 
-<!-- Link manifest -->
+<!-- Manifest -->
 <link rel="manifest" href="manifest.json">
 
-<!-- Link external JS -->
+<!-- JS -->
 <script defer src="app.js"></script>
 
 <style>
@@ -82,19 +82,19 @@
 <div id="lock-screen">
     <h2>Enter Access Code</h2>
     <input type="password" id="passcode" placeholder="••••" inputmode="numeric">
-    <button onclick="checkAccess()">Unlock</button>
+    <button id="unlockBtn">Unlock</button>
     <p id="error">Incorrect Code</p>
 </div>
 
 <div id="app-content">
     <h2>Welcome Back</h2>
 
-    <!-- Opens Snapchat in Safari -->
+    <!-- Opens in Safari -->
     <a href="https://accounts.snapchat.com/v2/login" target="_blank">
         <button class="snap-btn">Open Snapchat</button>
     </a>
 
-    <!-- Optional app open -->
+    <!-- Opens app -->
     <a href="snapchat://">
         <button style="margin-top:10px;">Open Snapchat App</button>
     </a>
