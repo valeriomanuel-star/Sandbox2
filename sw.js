@@ -1,25 +1,30 @@
-const CACHE_NAME = 'sandbox-v1';
+const CACHE_NAME = 'sandbox-v2'; // Increment this when you change files
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon-192.png' // Make sure you have an icon with this name!
+  './icon-192.png' 
 ];
 
-// 1. Install: Save files to the phone's memory
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+  );
+});
+
+// Clean up old caches
+self.addEventListener('activate', (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(keys.map((key) => {
+        if (key !== CACHE_NAME) return caches.delete(key);
+      }));
     })
   );
 });
 
-// 2. Fetch: Use the saved files if there's no internet
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    caches.match(event.request).then((res) => res || fetch(event.request))
   );
 });
