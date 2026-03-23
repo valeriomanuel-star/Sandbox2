@@ -1,27 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Sandbox</title>
-    <link rel="manifest" href="manifest.json">
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        iframe { width: 100%; height: 80vh; border: none; border-radius: 15px; }
-    </style>
-</head>
-<body>
-    <h1>My App Sandbox</h1>
-    <iframe src="https://www.tiktok.com"></iframe>
+<div id="image-container" style="margin-top: 20px;">
+    <p id="status">No image shared yet.</p>
+    <img id="shared-img" style="max-width: 90%; border-radius: 10px; display: none;" />
+</div>
+
 <script>
+  // This code runs as soon as the app opens
+  window.addEventListener('DOMContentLoaded', () => {
+    const parsedUrl = new URL(window.location);
+    const sharedUrl = parsedUrl.searchParams.get('url') || parsedUrl.searchParams.get('text');
+
+    if (sharedUrl) {
+      const img = document.getElementById('shared-img');
+      const status = document.getElementById('status');
+      
+      img.src = sharedUrl;
+      img.style.display = 'block';
+      status.innerText = "Shared Snapshot:";
+    }
+  });
+
+  // Your existing Service Worker registration
   if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => console.log('App ready!'))
-        .catch(err => console.log('Setup failed', err));
-    });
+    navigator.serviceWorker.register('./sw.js')
+      .then(reg => console.log('App ready!'));
   }
 </script>
-
-</body>
-</html>
