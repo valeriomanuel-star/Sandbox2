@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Portal</title>
 
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icons-192.png.png">
     <link rel="manifest" href="manifest.json">
 
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <style>
         body {
@@ -110,15 +111,12 @@
             }
         }
 
-        // Button click
         document.getElementById('unlockBtn').addEventListener('click', checkAccess);
 
-        // Enter key support
         document.getElementById('passcode').addEventListener('keypress', (e) => {
             if (e.key === 'Enter') checkAccess();
         });
 
-        // Auto focus input on load
         window.onload = () => {
             document.getElementById('passcode').focus();
         };
