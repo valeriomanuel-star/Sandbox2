@@ -2,24 +2,24 @@
 const secret = "1234";
 
 function checkAccess() {
-    const code = document.getElementById('passcode').value;
+    const code = input.value;
 
     if (code === secret) {
-        document.getElementById('lock-screen').style.display = 'none';
-        document.getElementById('app-content').style.display = 'block';
+        lockScreen.style.display = 'none';
+        appContent.style.display = 'block';
     } else {
-        document.getElementById('error').style.display = 'block';
-        document.getElementById('passcode').value = '';
+        errorText.style.display = 'block';
+        input.value = '';
     }
 }
 
-// Make function available globally (important for iPhone)
-window.checkAccess = checkAccess;
-
 // Wait for page to load
 document.addEventListener('DOMContentLoaded', () => {
-    const input = document.getElementById('passcode');
-    const button = document.getElementById('unlockBtn');
+    window.input = document.getElementById('passcode');
+    window.button = document.getElementById('unlockBtn');
+    window.lockScreen = document.getElementById('lock-screen');
+    window.appContent = document.getElementById('app-content');
+    window.errorText = document.getElementById('error');
 
     // Auto focus input
     input.focus();
@@ -28,9 +28,14 @@ document.addEventListener('DOMContentLoaded', () => {
     button.addEventListener('click', checkAccess);
 
     // Enter key triggers unlock
-    input.addEventListener('keypress', function(e) {
+    input.addEventListener('keydown', function(e) {
         if (e.key === 'Enter') {
             checkAccess();
         }
+    });
+
+    // Hide error when typing again
+    input.addEventListener('input', () => {
+        errorText.style.display = 'none';
     });
 });
