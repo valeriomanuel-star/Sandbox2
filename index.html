@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Portal</title>
 
-    <link rel="apple-touch-icon" href="icons-192.png.png">
+    <!-- PWA / iOS -->
+    <link rel="apple-touch-icon" href="icons-192.png">
     <link rel="manifest" href="manifest.json">
-
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Portal">
 
     <style>
         body {
@@ -80,7 +81,13 @@
 
     <div id="lock-screen">
         <h2>Enter Access Code</h2>
-        <input type="password" id="passcode" placeholder="••••" inputmode="numeric">
+        <input 
+            type="password" 
+            id="passcode" 
+            placeholder="••••" 
+            inputmode="numeric"
+            autofocus
+        >
         <button id="unlockBtn">Unlock</button>
         <p id="error">Incorrect Code</p>
     </div>
@@ -98,10 +105,11 @@
     </div>
 
     <script>
-        const secret = "1234";
+        const secret = "1234"; // Change this
 
         function checkAccess() {
             const code = document.getElementById('passcode').value;
+
             if (code === secret) {
                 document.getElementById('lock-screen').style.display = 'none';
                 document.getElementById('app-content').style.display = 'block';
@@ -111,15 +119,18 @@
             }
         }
 
+        const passInput = document.getElementById('passcode');
+
         document.getElementById('unlockBtn').addEventListener('click', checkAccess);
 
-        document.getElementById('passcode').addEventListener('keypress', (e) => {
+        passInput.addEventListener('keydown', (e) => {
             if (e.key === 'Enter') checkAccess();
         });
 
-        window.onload = () => {
-            document.getElementById('passcode').focus();
-        };
+        // Hide error when typing again
+        passInput.addEventListener('input', () => {
+            document.getElementById('error').style.display = 'none';
+        });
     </script>
 
 </body>
