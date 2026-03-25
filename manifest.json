@@ -1,20 +1,31 @@
 {
-  "short_name": "Portal",
-  "name": "My Private Portal",
+  "short_name": "SnapShow",
+  "name": "SnapShow Private Portal",
+  "description": "Secure access portal for SnapShow Web.",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "icon.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
   ],
   "start_url": "index.html",
   "display": "standalone",
-  "background_color": "#f8f9fa",
-  "theme_color": "#007AFF"
+  "background_color": "#FFFC00",
+  "theme_color": "#FFFC00",
+  "orientation": "portrait",
+  "scope": "/",
+  "shortcuts": [
+    {
+      "name": "Open Portal",
+      "url": "index.html",
+      "icons": [{ "src": "icon-192.png", "sizes": "192x192" }]
+    }
+  ]
 }
