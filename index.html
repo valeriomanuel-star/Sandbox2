@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Private Portal</title>
 
-    <!-- Prevent iPhone app sandbox issues -->
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="manifest" href="manifest.json">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
 
     <style>
@@ -85,12 +87,10 @@
     <div id="app-content">
         <h2>Welcome Back</h2>
 
-        <!-- Opens Snapchat web -->
         <a href="https://accounts.snapchat.com/v2/login" target="_blank" class="snap-btn">
             Open Snapchat Web
         </a>
 
-        <!-- Optional: opens Snapchat app -->
         <a href="snapchat://" style="display:block; margin-top:10px; color:#666; text-decoration:none; font-size:14px;">
             Open Snapchat App
         </a>
