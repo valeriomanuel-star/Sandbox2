@@ -6,8 +6,10 @@
     <title>Private Portal</title>
 
     <!-- PWA / iOS -->
-    <link rel="apple-touch-icon" href="icons-192.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
+    <link rel="apple-touch-icon" sizes="192x192" href="icons-192.png">
     <link rel="manifest" href="manifest.json">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Portal">
@@ -105,31 +107,38 @@
     </div>
 
     <script>
-        const secret = "1234"; // Change this
+        document.addEventListener('DOMContentLoaded', () => {
+            const secret = "1234"; // change this
 
-        function checkAccess() {
-            const code = document.getElementById('passcode').value;
+            const passInput = document.getElementById('passcode');
+            const unlockBtn = document.getElementById('unlockBtn');
+            const lockScreen = document.getElementById('lock-screen');
+            const appContent = document.getElementById('app-content');
+            const errorText = document.getElementById('error');
 
-            if (code === secret) {
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-            } else {
-                document.getElementById('error').style.display = 'block';
-                document.getElementById('passcode').value = '';
+            function checkAccess() {
+                const code = passInput.value;
+
+                if (code === secret) {
+                    lockScreen.style.display = 'none';
+                    appContent.style.display = 'block';
+                } else {
+                    errorText.style.display = 'block';
+                    passInput.value = '';
+                }
             }
-        }
 
-        const passInput = document.getElementById('passcode');
+            unlockBtn.addEventListener('click', checkAccess);
 
-        document.getElementById('unlockBtn').addEventListener('click', checkAccess);
+            passInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') checkAccess();
+            });
 
-        passInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') checkAccess();
-        });
+            passInput.addEventListener('input', () => {
+                errorText.style.display = 'none';
+            });
 
-        // Hide error when typing again
-        passInput.addEventListener('input', () => {
-            document.getElementById('error').style.display = 'none';
+            passInput.focus();
         });
     </script>
 
