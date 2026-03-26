@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Security Audit: Salted & Stretched</title>
+    <style>
+        body { font-family: 'Courier New', monospace; background: #0a0a0a; color: #00ff41; padding: 20px; }
+        .terminal { border: 1px solid #00ff41; padding: 20px; border-radius: 5px; box-shadow: 0 0 15px rgba(0, 255, 65, 0.2); }
+        #log { height: 250px; overflow-y: auto; background: #000; padding: 10px; margin: 15px 0; border: 1px solid #333; font-size: 13px; }
+        button { background: #00ff41; color: #000; border: none; padding: 15px; width: 100%; font-weight: bold; cursor: pointer; border-radius: 4px; }
+        .stat { color: #fff; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="terminal">
+        <h3>STRETCHED-HASH AUDITOR v1.0</h3>
+        <div class="stat">Target: Salted SHA-256 (1000 iterations)</div>
+        <div class="stat">Known Salt: <span style="color:yellow">MySecretSalt2026</span></div>
+        
+        <button onclick="runAudit()">START DICTIONARY ATTACK</button>
+        
+        <div id="log">Console initialized... standing by.</div>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function runAudit() {
+            // This must match the secureHash in your index.html
+            const targetHash = "f9a5e2f7b8d9c1a2e3f4b5d6a7c8e9f0123456789abcdef0123456789abcdef";
+            const salt = "MySecretSalt2026";
+            
+            const log = document.getElementById('log');
+            const result = document.getElementById('result');
+            
+            // The "Dictionary" of variations you provided
+            const bases = ["Quique", "quique", "Kike", "kike", "Enrique"];
+            const suffixes = ["123#", "1234$", "123$", "1234"];
+            
+            log.innerHTML = "Beginning attack sequence...<br>";
+            const startTime = performance.now();
+
+            for (let b of bases) {
+                for (let s of suffixes) {
+                    let trial = b + s;
+                    log.innerHTML += `Testing: ${trial}...<br>`;
+                    log.scrollTop = log.scrollHeight;
+
+                    // Match the stretching logic: 1000 iterations
+                    let currentHash = trial + salt;
+                    const enc = new TextEncoder();
+
+                    for (let i = 0; i < 1000; i++) {
+                        const buf = await crypto.subtle.digest('SHA-256', enc.encode(currentHash));
+                        currentHash = Array.from(new Uint8Array(buf)).map(x => x.toString(16).padStart(2, '0')).join('');
+                    }
+
+                    if (currentHash === targetHash) {
+                        const duration = ((performance.now() - startTime) / 1000).toFixed(2);
+                        result.innerHTML = `<h2 style="color:yellow">MATCH FOUND: ${trial}</h2><p>Time: ${duration} seconds</p>`;
+                        return;
+                    }
+                    
+                    // Small delay so your iPhone browser doesn't freeze
+                    await new Promise(r => setTimeout(r, 10));
+                }
+            }
+            log.innerHTML += "Audit complete. No matches found.";
+        }
+    </script>
+</body>
+</html>
