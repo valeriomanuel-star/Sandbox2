@@ -2,145 +2,117 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Private Portal</title>
 
-    <!-- PWA / iOS -->
-    <link rel="apple-touch-icon" sizes="180x180" href="icon-180.png">
-    <link rel="apple-touch-icon" sizes="192x192" href="icons-192.png">
-    <link rel="manifest" href="manifest.json">
-
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="Portal">
-
     <style>
-        body {
-            font-family: -apple-system, system-ui, sans-serif;
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: -apple-system, sans-serif;
+            background-color: #f2f2f7;
+            overflow: hidden; /* Prevents scrolling away from the lock screen */
+        }
+
+        /* Lock Screen Styles */
+        #lock-screen {
             display: flex;
+            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            margin: 0;
-            background-color: #f8f9fa;
+            text-align: center;
+            transition: opacity 0.4s ease;
         }
 
-        #lock-screen, #app-content {
-            text-align: center;
+        .box {
             background: white;
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            padding: 40px 30px;
+            border-radius: 24px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
             width: 85%;
             max-width: 350px;
         }
 
-        #app-content { display: none; }
-
         input[type="password"] {
             width: 100%;
             padding: 15px;
-            margin: 15px 0;
-            border: 1px solid #ddd;
-            border-radius: 12px;
-            font-size: 18px;
+            margin: 20px 0;
+            border: 1px solid #d1d1d6;
+            border-radius: 14px;
+            font-size: 24px;
             text-align: center;
             outline: none;
+            box-sizing: border-box;
         }
 
-        button {
-            background-color: #007AFF;
+        /* App Content / The "Container" */
+        #app-content {
+            display: none;
+            width: 100%;
+            height: 100vh;
+            background: white;
+        }
+
+        /* The Magic Part: Keeping them in the HTML */
+        iframe {
+            width: 100%;
+            height: calc(100% - 60px); /* Leaves room for a 'Back' bar */
+            border: none;
+        }
+
+        .top-bar {
+            height: 60px;
+            background: #FFFC00; /* Snapchat Yellow */
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            font-weight: bold;
+            justify-content: space-between;
+        }
+
+        .exit-btn {
+            background: black;
             color: white;
             border: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-size: 16px;
-            font-weight: 600;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        .snap-btn {
-            background-color: #FFFC00;
-            color: black;
-            margin-top: 20px;
-            display: block;
-            text-decoration: none;
-            padding: 15px;
-            border-radius: 12px;
-            font-weight: bold;
-        }
-
-        #error {
-            color: #FF3B30;
-            font-size: 14px;
-            display: none;
-            margin-top: 10px;
+            padding: 8px 15px;
+            border-radius: 10px;
+            font-size: 12px;
         }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <h2>Enter Access Code</h2>
-        <input 
-            type="password" 
-            id="passcode" 
-            placeholder="••••" 
-            inputmode="numeric"
-            autofocus
-        >
-        <button id="unlockBtn">Unlock</button>
-        <p id="error">Incorrect Code</p>
+        <div class="box">
+            <h2>Access Code</h2>
+            <input type="password" id="passcode" placeholder="••••" inputmode="numeric" maxlength="4">
+            <p id="error" style="color:red; display:none;">Try Again</p>
+        </div>
     </div>
 
     <div id="app-content">
-        <h2>Welcome Back</h2>
-
-        <a href="https://accounts.snapchat.com/v2/login" target="_blank" class="snap-btn">
-            Open Snapchat Web
-        </a>
-
-        <a href="snapchat://" style="display:block; margin-top:10px; color:#666; text-decoration:none; font-size:14px;">
-            Open Snapchat App
-        </a>
+        <div class="top-bar">
+            <span>Snapchat Web View</span>
+            <button class="exit-btn" onclick="location.reload()">Lock Portal</button>
+        </div>
+        <iframe src="https://web.snapchat.com" allow="camera; microphone"></iframe>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const secret = "1234"; // change this
+        const secret = "1234";
+        const passInput = document.getElementById('passcode');
 
-            const passInput = document.getElementById('passcode');
-            const unlockBtn = document.getElementById('unlockBtn');
-            const lockScreen = document.getElementById('lock-screen');
-            const appContent = document.getElementById('app-content');
-            const errorText = document.getElementById('error');
-
-            function checkAccess() {
-                const code = passInput.value;
-
-                if (code === secret) {
-                    lockScreen.style.display = 'none';
-                    appContent.style.display = 'block';
-                } else {
-                    errorText.style.display = 'block';
-                    passInput.value = '';
-                }
+        passInput.addEventListener('input', () => {
+            if (passInput.value === secret) {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('app-content').style.display = 'block';
+            } else if (passInput.value.length >= 4) {
+                document.getElementById('error').style.display = 'block';
+                passInput.value = '';
             }
-
-            unlockBtn.addEventListener('click', checkAccess);
-
-            passInput.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') checkAccess();
-            });
-
-            passInput.addEventListener('input', () => {
-                errorText.style.display = 'none';
-            });
-
-            passInput.focus();
         });
     </script>
-
 </body>
 </html>
