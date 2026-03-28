@@ -1,133 +1,245 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secure Uplink</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Secure Uplink</title>
 
-<link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="manifest.json">
 
-<style>
-:root { --g:#00FF41; }
+    <style>
+        :root { --g: #00FF41; --b: #0D0208; }
 
-body {
-    margin:0;
-    background:black;
-    color:var(--g);
-    font-family:monospace;
-    overflow:hidden;
-}
+        body {
+            margin: 0;
+            background: var(--b);
+            color: var(--g);
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+            -webkit-user-select: none;
+            user-select: none;
+        }
 
-/* Screens */
-.screen {
-    display:none;
-    height:100vh;
-    justify-content:center;
-    align-items:center;
-    flex-direction:column;
-}
+        /* Screen Management */
+        .screen {
+            display: none;
+            height: 100vh;
+            width: 100vw;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            text-align: center;
+            position: absolute;
+            top: 0; left: 0;
+        }
 
-.active { display:flex; }
+        .active { display: flex; }
 
-/* Box */
-.box {
-    border:2px solid var(--g);
-    padding:30px;
-    background:rgba(0,0,0,0.9);
-    box-shadow:0 0 20px var(--g);
-    border-radius:10px;
-    text-align:center;
-}
+        /* UI Elements */
+        .box {
+            border: 2px solid var(--g);
+            padding: 30px;
+            background: rgba(0, 0, 0, 0.95);
+            box-shadow: 0 0 25px var(--g);
+            border-radius: 12px;
+            width: 80%;
+            max-width: 300px;
+        }
 
-/* Input */
-input {
-    font-size:24px;
-    padding:10px;
-    margin-top:15px;
-    width:140px;
-    text-align:center;
-    background:black;
-    border:1px solid var(--g);
-    color:var(--g);
-}
+        input {
+            font-size: 24px;
+            padding: 12px;
+            margin-top: 15px;
+            width: 80%;
+            text-align: center;
+            background: black;
+            border: 1px solid var(--g);
+            color: var(--g);
+            outline: none;
+            border-radius: 8px;
+        }
 
-/* Button */
-button {
-    margin-top:15px;
-    padding:10px 20px;
-    background:black;
-    border:1px solid var(--g);
-    color:var(--g);
-    cursor:pointer;
-}
+        button {
+            margin-top: 20px;
+            padding: 12px 25px;
+            background: var(--g);
+            border: none;
+            color: black;
+            font-weight: bold;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 8px;
+            width: 100%;
+        }
 
-/* Face ID */
-#face {
-    width:120px;
-    height:120px;
-    border:3px solid var(--g);
-    border-radius:50%;
-    animation:pulse 1.5s infinite;
-}
+        button:active { opacity: 0.7; }
 
-@keyframes pulse {
-    0% { box-shadow:0 0 5px var(--g); }
-    50% { box-shadow:0 0 25px var(--g); }
-    100% { box-shadow:0 0 5px var(--g); }
-}
+        /* Animations */
+        #face {
+            width: 140px;
+            height: 140px;
+            border: 4px solid var(--g);
+            border-radius: 50%;
+            margin-bottom: 20px;
+            animation: pulse 1.5s infinite ease-in-out;
+            position: relative;
+        }
 
-/* Hack log */
-#log {
-    width:80%;
-    max-width:400px;
-    text-align:left;
-    font-size:14px;
-    margin-bottom:20px;
-}
-</style>
+        #face::after {
+            content: "";
+            position: absolute;
+            top: 50%; left: 10%;
+            width: 80%; height: 2px;
+            background: var(--g);
+            animation: scan 2s infinite linear;
+        }
+
+        @keyframes scan { 0% { top: 10%; } 50% { top: 90%; } 100% { top: 10%; } }
+        @keyframes pulse { 0%, 100% { box-shadow: 0 0 10px var(--g); } 50% { box-shadow: 0 0 40px var(--g); } }
+
+        #log {
+            width: 85%;
+            max-width: 400px;
+            text-align: left;
+            font-size: 13px;
+            height: 150px;
+            overflow: hidden;
+            margin-bottom: 10px;
+            color: #00cc33;
+        }
+
+        #error { color: #ff3b30; font-size: 14px; margin-top: 10px; height: 20px; }
+    </style>
 </head>
-
 <body>
 
-<!-- LOCK SCREEN -->
-<div id="lock" class="screen active">
-    <div class="box">
-        <h2>SECURE_UPLINK</h2>
-        <input id="pin" maxlength="4" placeholder="PIN">
-        <button id="unlockBtn">Unlock</button>
-        <p id="error"></p>
+    <div id="lock" class="screen active">
+        <div class="box">
+            <h2 style="letter-spacing: 3px;">SYSTEM_LOCKED</h2>
+            <input id="pin" type="password" maxlength="4" placeholder="PIN" inputmode="numeric">
+            <button id="unlockBtn">ACCESS</button>
+            <p id="error"></p>
+        </div>
     </div>
-</div>
 
-<!-- HACK SEQUENCE -->
-<div id="hack" class="screen">
-    <div id="log"></div>
-    <h3>BYPASSING FIREWALL: <span id="timer">60</span>s</h3>
-</div>
-
-<!-- FACE ID -->
-<div id="faceScreen" class="screen">
-    <div id="face"></div>
-    <p>Scanning Face...</p>
-</div>
-
-<!-- PROFILE SETUP -->
-<div id="profileSetup" class="screen">
-    <div class="box">
-        <h2>CREATE PROFILE</h2>
-        <input id="username" placeholder="Username">
-        <button onclick="saveProfile()">ENTER</button>
+    <div id="hack" class="screen">
+        <div id="log"></div>
+        <h3 style="letter-spacing: 1px;">BYPASSING_FIREWALL: <span id="timer">60</span>s</h3>
     </div>
-</div>
 
-<!-- DASHBOARD -->
-<div id="dashboard" class="screen">
-    <h2>SECURE SYSTEM</h2>
-    <p id="welcome"></p>
-    <button onclick="launchSnap()">Open Snapchat</button>
-    <button onclick="logout()">Logout</button>
-</div>
+    <div id="faceScreen" class="screen">
+        <div id="face"></div>
+        <p style="letter-spacing: 2px;">SCANNING BIOMETRICS...</p>
+    </div>
 
-<script src="app.js"></script>
+    <div id="profileSetup" class="screen">
+        <div class="box">
+            <h2>NEW USER DETECTED</h2>
+            <p style="font-size: 12px;">IDENTIFY YOURSELF:</p>
+            <input id="username" placeholder="OPERATOR NAME" spellcheck="false">
+            <button onclick="saveProfile()">INITIALIZE</button>
+        </div>
+    </div>
+
+    <div id="dashboard" class="screen">
+        <div class="box">
+            <h2 id="welcome">WELCOME</h2>
+            <p style="font-size: 11px; color: #666;">UPLINK STATUS: STABLE</p>
+            <button onclick="launchSnap()" style="background: #FFFC00; color: black;">OPEN SNAPCHAT</button>
+            <button onclick="logout()" style="background: transparent; color: #ff3b30; border: 1px solid #ff3b30; margin-top: 10px;">PURGE SESSION</button>
+        </div>
+    </div>
+
+    <script>
+        const secret = "1234";
+
+        function show(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+
+        // --- PIN CHECK ---
+        document.getElementById('unlockBtn').addEventListener('click', () => {
+            const pinVal = document.getElementById('pin').value;
+            if (pinVal === secret) {
+                show('hack');
+                startHack();
+            } else {
+                document.getElementById('error').innerText = "INVALID_CREDENTIALS";
+                document.getElementById('pin').value = "";
+            }
+        });
+
+        // --- HACK SEQUENCE ---
+        function startHack() {
+            let time = 60;
+            const log = document.getElementById('log');
+            const lines = [
+                "> Connecting to Parkville Node...",
+                "> BMS Security Layer 4: Found.",
+                "> Injecting iFrame bypass...",
+                "> Masking device signature...",
+                "> SSL Handshake established.",
+                "> Redirecting traffic through VPN...",
+                "> ACCESS_GRANTED."
+            ];
+
+            let i = 0;
+            const logInterval = setInterval(() => {
+                if (i < lines.length) {
+                    log.innerHTML += lines[i] + "<br>";
+                    i++;
+                } else clearInterval(logInterval);
+            }, 1800);
+
+            const timerInterval = setInterval(() => {
+                time--;
+                document.getElementById('timer').innerText = time;
+                if (time <= 0) {
+                    clearInterval(timerInterval);
+                    showFaceID();
+                }
+            }, 1000);
+        }
+
+        // --- FACE ID ---
+        function showFaceID() {
+            show('faceScreen');
+            setTimeout(() => {
+                const user = localStorage.getItem("profileName");
+                if (user) {
+                    loadDashboard(user);
+                } else {
+                    show('profileSetup');
+                }
+            }, 3500);
+        }
+
+        // --- PROFILE ---
+        window.saveProfile = function() {
+            const name = document.getElementById('username').value;
+            if (!name) return;
+            localStorage.setItem("profileName", name);
+            loadDashboard(name);
+        };
+
+        // --- DASHBOARD ---
+        function loadDashboard(name) {
+            document.getElementById('welcome').innerText = "OPERATOR: " + name.toUpperCase();
+            show('dashboard');
+        }
+
+        window.launchSnap = function() {
+            // Using replace to ensure the browser doesn't try to go 'back' into the portal
+            window.location.replace("https://web.snapchat.com");
+        };
+
+        window.logout = function() {
+            localStorage.removeItem("profileName");
+            location.reload();
+        };
+    </script>
 </body>
 </html>
