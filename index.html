@@ -3,153 +3,131 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Private Portal</title>
-
+    <title>Secure Portal</title>
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="icon-180.png">
 
     <style>
-        :root {
-            --bg-color: #f2f2f7;
-            --ios-blue: #007AFF;
-            --snap-yellow: #FFFC00;
-        }
+        :root { --g: #00FF41; --b: #0D0208; }
+        body, html { margin: 0; padding: 0; height: 100%; background: var(--b); font-family: 'Courier New', monospace; overflow: hidden; color: var(--g); }
+        
+        /* 1. Lock Screen */
+        #lock-screen { display: flex; justify-content: center; align-items: center; height: 100vh; position: relative; z-index: 10; }
+        .box { border: 2px solid var(--g); padding: 30px; background: rgba(0,0,0,0.9); text-align: center; width: 280px; box-shadow: 0 0 20px var(--g); }
+        input { width: 80%; padding: 10px; background: black; border: 1px solid var(--g); color: var(--g); font-size: 24px; text-align: center; outline: none; }
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            background-color: var(--bg-color);
-            font-family: -apple-system, system-ui, sans-serif;
-            overflow: hidden;
-        }
+        /* 2. Matrix Animation Background */
+        #matrix-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; opacity: 0.3; }
 
-        /* Lock Screen */
-        #lock-screen {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            z-index: 100;
-            transition: opacity 0.4s ease;
-        }
+        /* 3. Matrix Loader Text */
+        #matrix-loader { display: none; height: 100vh; width: 100vw; flex-direction: column; justify-content: center; align-items: center; position: absolute; top: 0; z-index: 5; }
+        #log { font-size: 14px; width: 80%; max-width: 400px; text-shadow: 0 0 5px var(--g); }
 
-        .login-box {
-            background: white;
-            padding: 40px 30px;
-            border-radius: 24px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            width: 280px;
-            text-align: center;
-        }
+        /* 4. The Portal - Forced Fullscreen */
+        #portal { display: none; height: 100vh; width: 100vw; flex-direction: column; background: white; position: fixed; top: 0; left: 0; }
+        iframe { flex-grow: 1; border: none; width: 100%; height: 100%; }
 
-        input[type="password"] {
-            width: 100%;
-            padding: 15px;
-            margin: 20px 0;
-            border: 1px solid #d1d1d6;
-            border-radius: 12px;
-            font-size: 24px;
-            text-align: center;
-            outline: none;
-            background: #f2f2f7;
-        }
-
-        /* Portal Container */
-        #portal-container {
-            display: none;
-            flex-direction: column;
-            height: 100vh;
-            width: 100vw;
-        }
-
-        .nav-bar {
-            height: 50px;
-            background: var(--snap-yellow);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 15px;
-            font-weight: bold;
-            border-bottom: 1px solid #ddd;
-        }
-
-        .reload-btn {
-            background: black;
-            color: white;
-            border: none;
-            padding: 5px 12px;
-            border-radius: 8px;
-            font-size: 11px;
-            cursor: pointer;
-        }
-
-        /* The Sandbox iFrame */
-        iframe {
-            flex-grow: 1;
-            width: 100%;
-            border: none;
-        }
-
-        #error-msg {
-            color: #FF3B30;
-            font-size: 14px;
-            display: none;
-        }
+        /* Disable user selection/copying to make it feel like a locked app */
+        * { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
+        input { -webkit-user-select: auto; user-select: auto; }
     </style>
 </head>
 <body>
 
+    <canvas id="matrix-canvas"></canvas>
+
     <div id="lock-screen">
-        <div class="login-box">
-            <h2 style="margin:0;">Portal</h2>
-            <input type="password" id="pin" placeholder="••••" inputmode="numeric" maxlength="4">
-            <p id="error-msg">Incorrect Code</p>
+        <div class="box">
+            <h2 style="font-size: 18px;">SECURE TERMINAL</h2>
+            <input type="password" id="pin" placeholder="PIN" inputmode="numeric" maxlength="4">
         </div>
     </div>
 
-    <div id="portal-container">
-        <div class="nav-bar">
-            <span>Private Web View</span>
-            <button class="reload-btn" onclick="location.reload()">Lock</button>
-        </div>
-        
-        <iframe 
-            id="portal-frame"
-            src="https://web.snapchat.com" 
-            sandbox="allow-forms allow-scripts allow-same-origin"
-        ></iframe>
+    <div id="matrix-loader">
+        <div id="log"></div>
+        <h3 style="margin-top:20px;">ENCRYPTION BYPASS: <span id="timer">60</span>s</h3>
+    </div>
+
+    <div id="portal">
+        <div onclick="location.reload()" style="position:absolute; top:0; right:0; width:50px; height:50px; z-index:999;"></div>
+        <iframe id="snap-frame" src="https://web.snapchat.com" sandbox="allow-forms allow-scripts allow-same-origin"></iframe>
     </div>
 
     <script>
-        const pinInput = document.getElementById('pin');
-        const lock = document.getElementById('lock-screen');
-        const portal = document.getElementById('portal-container');
-        const error = document.getElementById('error-msg');
+        const pin = document.getElementById('pin');
+        const canvas = document.getElementById('matrix-canvas');
+        const ctx = canvas.getContext('2d');
 
-        const SECRET_CODE = "1234"; // Update this to your PIN
+        // Matrix Rain Setup
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        const letters = "日Hｱﾐﾂﾃﾆﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗﾙﾚﾛｦﾝ0123456789";
+        const fontSize = 16;
+        const columns = canvas.width / fontSize;
+        const drops = Array(Math.floor(columns)).fill(1);
 
-        pinInput.addEventListener('input', () => {
-            error.style.display = 'none';
-            
-            if (pinInput.value === SECRET_CODE) {
-                pinInput.blur();
-                lock.style.opacity = '0';
-                setTimeout(() => {
-                    lock.style.display = 'none';
-                    portal.style.display = 'flex';
-                }, 400);
-            } else if (pinInput.value.length >= 4) {
-                error.style.display = 'block';
-                pinInput.value = '';
+        function drawMatrix() {
+            ctx.fillStyle = "rgba(0, 0, 0, 0.05)";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#00FF41";
+            ctx.font = fontSize + "px arial";
+            for (let i = 0; i < drops.length; i++) {
+                const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+                drops[i]++;
+            }
+        }
+
+        pin.addEventListener('input', () => {
+            if (pin.value === "1234") {
+                pin.blur();
+                // Request fullscreen on the whole body
+                if (document.documentElement.requestFullscreen) {
+                    document.documentElement.requestFullscreen();
+                }
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('matrix-loader').style.display = 'flex';
+                canvas.style.display = 'block';
+                const rain = setInterval(drawMatrix, 33);
+                startHackerSequence(rain);
             }
         });
 
-        // Prevents the browser from accidentally navigating away
-        window.onbeforeunload = function() {
-            return "Do you want to leave the secure portal?";
-        };
+        function startHackerSequence(rainInterval) {
+            let timeLeft = 60;
+            const logLines = [
+                "> Proxy connection established...",
+                "> Locating Parkville Uplink...",
+                "> BMS Firewall: Level 4 Breach...",
+                "> Injecting Snapchat.js payload...",
+                "> Scrubbing server logs...",
+                "> Secure line established."
+            ];
+            
+            let lineIdx = 0;
+            const textInterval = setInterval(() => {
+                if (lineIdx < logLines.length) {
+                    document.getElementById('log').innerHTML += logLines[lineIdx] + "<br>";
+                    lineIdx++;
+                }
+            }, 2000);
+
+            const timerInterval = setInterval(() => {
+                timeLeft--;
+                document.getElementById('timer').innerText = timeLeft;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    clearInterval(textInterval);
+                    clearInterval(rainInterval);
+                    document.getElementById('matrix-loader').style.display = 'none';
+                    canvas.style.display = 'none';
+                    document.getElementById('portal').style.display = 'flex';
+                }
+            }, 1000);
+        }
     </script>
 </body>
 </html>
