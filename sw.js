@@ -1,5 +1,10 @@
+// ============================
+// app.js
+// ============================
+
 const secret = "1234";
 
+// Screens
 const screens = {
     lock: document.getElementById("lock"),
     hack: document.getElementById("hack"),
@@ -8,38 +13,62 @@ const screens = {
     dashboard: document.getElementById("dashboard")
 };
 
+// Elements
 const pin = document.getElementById("pin");
+const unlockBtn = document.getElementById("unlockBtn");
 const error = document.getElementById("error");
 
-/* SWITCH SCREEN */
+// ============================
+// PIN CHECK FUNCTION
+// ============================
+function checkPin() {
+    if (pin.value === secret) {
+        startSystem(); // proceed to hack sequence
+    } else {
+        error.innerText = "ACCESS DENIED";
+        pin.value = "";
+    }
+}
+
+// ============================
+// Event Listeners
+// ============================
+
+// Button click
+unlockBtn.addEventListener("click", checkPin);
+
+// Press Enter key
+pin.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") checkPin();
+});
+
+// ============================
+// SCREEN SWITCH FUNCTION
+// ============================
 function show(screen) {
     Object.values(screens).forEach(s => s.classList.remove("active"));
     screen.classList.add("active");
 }
 
-/* PIN INPUT */
-pin.addEventListener("input", () => {
-    if (pin.value.length === 4) {
-        if (pin.value === secret) {
-            startSystem();
-        } else {
-            error.innerText = "ACCESS DENIED";
-            pin.value = "";
-        }
-    }
-});
-
-/* START */
+// ============================
+// START SYSTEM (HACK SEQUENCE)
+// ============================
 function startSystem() {
+    // Fullscreen (optional)
     document.documentElement.requestFullscreen().catch(()=>{});
+
+    // Show hack screen
     show(screens.hack);
     startHack();
 }
 
-/* HACK */
+// ============================
+// HACK SEQUENCE
+// ============================
 function startHack() {
     let time = 60;
     const log = document.getElementById("log");
+    log.innerHTML = ""; // clear previous logs
 
     const lines = [
         "> Establishing secure tunnel...",
@@ -51,25 +80,31 @@ function startHack() {
 
     let i = 0;
 
-    const logInt = setInterval(() => {
+    // Log lines one by one
+    const logInterval = setInterval(() => {
         if (i < lines.length) {
             log.innerHTML += lines[i] + "<br>";
             i++;
-        } else clearInterval(logInt);
+        } else {
+            clearInterval(logInterval);
+        }
     }, 2000);
 
-    const timer = setInterval(() => {
+    // Countdown timer
+    const timerInterval = setInterval(() => {
         time--;
         document.getElementById("timer").innerText = time;
 
         if (time <= 0) {
-            clearInterval(timer);
+            clearInterval(timerInterval);
             showFace();
         }
     }, 1000);
 }
 
-/* FACE */
+// ============================
+// FACE ID SEQUENCE
+// ============================
 function showFace() {
     show(screens.face);
 
@@ -80,7 +115,9 @@ function showFace() {
     }, 3000);
 }
 
-/* PROFILE */
+// ============================
+// PROFILE SETUP
+// ============================
 function saveProfile() {
     const name = document.getElementById("username").value;
     if (!name) return;
@@ -89,20 +126,26 @@ function saveProfile() {
     loadDashboard();
 }
 
-/* DASHBOARD */
+// ============================
+// DASHBOARD
+// ============================
 function loadDashboard() {
     show(screens.dashboard);
     const name = localStorage.getItem("profileName");
     document.getElementById("welcome").innerText = "Welcome, " + name;
 }
 
-/* LOGOUT */
+// ============================
+// LOGOUT
+// ============================
 function logout() {
     localStorage.removeItem("profileName");
     location.reload();
 }
 
-/* OPEN SNAP */
+// ============================
+// OPEN SNAPCHAT WEB
+// ============================
 function launchSnap() {
     window.location.href = "https://web.snapchat.com";
 }
