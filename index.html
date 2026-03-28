@@ -3,10 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Secure System</title>
+<title>Secure Uplink</title>
+
+<link rel="manifest" href="manifest.json">
 
 <style>
-:root { --g:#00FF41; --b:#0D0208; }
+:root { --g:#00FF41; }
+
 body {
     margin:0;
     background:black;
@@ -15,14 +18,16 @@ body {
     overflow:hidden;
 }
 
-/* Center screen */
-.center {
-    display:flex;
+/* Screens */
+.screen {
+    display:none;
+    height:100vh;
     justify-content:center;
     align-items:center;
-    height:100vh;
     flex-direction:column;
 }
+
+.active { display:flex; }
 
 /* Box */
 .box {
@@ -39,17 +44,23 @@ input {
     font-size:24px;
     padding:10px;
     margin-top:15px;
-    width:120px;
+    width:140px;
     text-align:center;
     background:black;
     border:1px solid var(--g);
     color:var(--g);
 }
 
-/* Hidden screens */
-.hidden { display:none; }
+/* Button */
+button {
+    margin-top:15px;
+    padding:10px 20px;
+    background:black;
+    border:1px solid var(--g);
+    color:var(--g);
+}
 
-/* Face ID circle */
+/* Face ID */
 #face {
     width:120px;
     height:120px;
@@ -68,8 +79,8 @@ input {
 
 <body>
 
-<!-- LOCK SCREEN -->
-<div id="lock" class="center">
+<!-- LOCK -->
+<div id="lock" class="screen active">
     <div class="box">
         <h2>SECURE_UPLINK</h2>
         <input id="pin" maxlength="4" placeholder="PIN">
@@ -77,92 +88,36 @@ input {
     </div>
 </div>
 
-<!-- HACK SCREEN -->
-<div id="hack" class="center hidden">
+<!-- HACK -->
+<div id="hack" class="screen">
     <div id="log"></div>
     <h3>BYPASSING FIREWALL: <span id="timer">60</span>s</h3>
 </div>
 
-<!-- FACE ID -->
-<div id="faceScreen" class="center hidden">
+<!-- FACE -->
+<div id="faceScreen" class="screen">
     <div id="face"></div>
     <p>Scanning Face...</p>
 </div>
 
-<script>
-const pin = document.getElementById("pin");
-const error = document.getElementById("error");
+<!-- PROFILE -->
+<div id="profileSetup" class="screen">
+    <div class="box">
+        <h2>CREATE PROFILE</h2>
+        <input id="username" placeholder="Username">
+        <button onclick="saveProfile()">ENTER</button>
+    </div>
+</div>
 
-/* PIN LOGIC */
-pin.addEventListener("input", () => {
-    if (pin.value.length === 4) {
-        if (pin.value === "1234") {
-            startSystem();
-        } else {
-            error.innerText = "ACCESS DENIED";
-            pin.value = "";
-        }
-    }
-});
+<!-- DASHBOARD -->
+<div id="dashboard" class="screen">
+    <h2>SECURE SYSTEM</h2>
+    <p id="welcome"></p>
 
-/* START SYSTEM */
-function startSystem() {
-    document.documentElement.requestFullscreen().catch(()=>{});
-    document.getElementById("lock").classList.add("hidden");
-    document.getElementById("hack").classList.remove("hidden");
-    startHack();
-}
+    <button onclick="launchSnap()">Open Snapchat</button>
+    <button onclick="logout()">Logout</button>
+</div>
 
-/* HACK SEQUENCE */
-function startHack() {
-    let time = 60;
-    const log = document.getElementById("log");
-
-    const lines = [
-        "> Establishing secure tunnel...",
-        "> Injecting exploit...",
-        "> Bypassing authentication...",
-        "> Masking identity...",
-        "> Access granted..."
-    ];
-
-    let i = 0;
-
-    const logInterval = setInterval(() => {
-        if (i < lines.length) {
-            log.innerHTML += lines[i] + "<br>";
-            i++;
-        } else {
-            clearInterval(logInterval);
-        }
-    }, 2000);
-
-    const timer = setInterval(() => {
-        time--;
-        document.getElementById("timer").innerText = time;
-
-        if (time <= 0) {
-            clearInterval(timer);
-            showFaceID();
-        }
-    }, 1000);
-}
-
-/* FACE ID */
-function showFaceID() {
-    document.getElementById("hack").classList.add("hidden");
-    document.getElementById("faceScreen").classList.remove("hidden");
-
-    setTimeout(() => {
-        document.body.innerHTML = "<h1 style='text-align:center;margin-top:40vh;'>ACCESS GRANTED</h1>";
-        
-        setTimeout(() => {
-            window.location.href = "https://web.snapchat.com";
-        }, 2000);
-
-    }, 3000);
-}
-</script>
-
+<script src="app.js"></script>
 </body>
 </html>
