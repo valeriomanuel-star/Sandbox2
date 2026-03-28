@@ -5,34 +5,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Private Portal</title>
 
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="icon-180.png">
+
     <style>
+        :root {
+            --bg-color: #f2f2f7;
+            --ios-blue: #007AFF;
+            --snap-yellow: #FFFC00;
+        }
+
         body, html {
             margin: 0;
             padding: 0;
             height: 100%;
-            font-family: -apple-system, sans-serif;
-            background-color: #f2f2f7;
-            overflow: hidden; /* Prevents scrolling away from the lock screen */
+            background-color: var(--bg-color);
+            font-family: -apple-system, system-ui, sans-serif;
+            overflow: hidden;
         }
 
-        /* Lock Screen Styles */
+        /* Lock Screen */
         #lock-screen {
             display: flex;
-            flex-direction: column;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            text-align: center;
+            z-index: 100;
             transition: opacity 0.4s ease;
         }
 
-        .box {
+        .login-box {
             background: white;
             padding: 40px 30px;
             border-radius: 24px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 85%;
-            max-width: 350px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            width: 280px;
+            text-align: center;
         }
 
         input[type="password"] {
@@ -40,79 +49,107 @@
             padding: 15px;
             margin: 20px 0;
             border: 1px solid #d1d1d6;
-            border-radius: 14px;
+            border-radius: 12px;
             font-size: 24px;
             text-align: center;
             outline: none;
-            box-sizing: border-box;
+            background: #f2f2f7;
         }
 
-        /* App Content / The "Container" */
-        #app-content {
+        /* Portal Container */
+        #portal-container {
             display: none;
-            width: 100%;
+            flex-direction: column;
             height: 100vh;
-            background: white;
+            width: 100vw;
         }
 
-        /* The Magic Part: Keeping them in the HTML */
-        iframe {
-            width: 100%;
-            height: calc(100% - 60px); /* Leaves room for a 'Back' bar */
-            border: none;
-        }
-
-        .top-bar {
-            height: 60px;
-            background: #FFFC00; /* Snapchat Yellow */
+        .nav-bar {
+            height: 50px;
+            background: var(--snap-yellow);
             display: flex;
             align-items: center;
-            padding: 0 20px;
-            font-weight: bold;
             justify-content: space-between;
+            padding: 0 15px;
+            font-weight: bold;
+            border-bottom: 1px solid #ddd;
         }
 
-        .exit-btn {
+        .reload-btn {
             background: black;
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 10px;
-            font-size: 12px;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+
+        /* The Sandbox iFrame */
+        iframe {
+            flex-grow: 1;
+            width: 100%;
+            border: none;
+        }
+
+        #error-msg {
+            color: #FF3B30;
+            font-size: 14px;
+            display: none;
         }
     </style>
 </head>
 <body>
 
     <div id="lock-screen">
-        <div class="box">
-            <h2>Access Code</h2>
-            <input type="password" id="passcode" placeholder="••••" inputmode="numeric" maxlength="4">
-            <p id="error" style="color:red; display:none;">Try Again</p>
+        <div class="login-box">
+            <h2 style="margin:0;">Portal</h2>
+            <input type="password" id="pin" placeholder="••••" inputmode="numeric" maxlength="4">
+            <p id="error-msg">Incorrect Code</p>
         </div>
     </div>
 
-    <div id="app-content">
-        <div class="top-bar">
-            <span>Snapchat Web View</span>
-            <button class="exit-btn" onclick="location.reload()">Lock Portal</button>
+    <div id="portal-container">
+        <div class="nav-bar">
+            <span>Private Web View</span>
+            <button class="reload-btn" onclick="location.reload()">Lock</button>
         </div>
-        <iframe src="https://web.snapchat.com" allow="camera; microphone"></iframe>
+        
+        <iframe 
+            id="portal-frame"
+            src="https://web.snapchat.com" 
+            sandbox="allow-forms allow-scripts allow-same-origin"
+        ></iframe>
     </div>
 
     <script>
-        const secret = "1234";
-        const passInput = document.getElementById('passcode');
+        const pinInput = document.getElementById('pin');
+        const lock = document.getElementById('lock-screen');
+        const portal = document.getElementById('portal-container');
+        const error = document.getElementById('error-msg');
 
-        passInput.addEventListener('input', () => {
-            if (passInput.value === secret) {
-                document.getElementById('lock-screen').style.display = 'none';
-                document.getElementById('app-content').style.display = 'block';
-            } else if (passInput.value.length >= 4) {
-                document.getElementById('error').style.display = 'block';
-                passInput.value = '';
+        const SECRET_CODE = "1234"; // Update this to your PIN
+
+        pinInput.addEventListener('input', () => {
+            error.style.display = 'none';
+            
+            if (pinInput.value === SECRET_CODE) {
+                pinInput.blur();
+                lock.style.opacity = '0';
+                setTimeout(() => {
+                    lock.style.display = 'none';
+                    portal.style.display = 'flex';
+                }, 400);
+            } else if (pinInput.value.length >= 4) {
+                error.style.display = 'block';
+                pinInput.value = '';
             }
         });
+
+        // Prevents the browser from accidentally navigating away
+        window.onbeforeunload = function() {
+            return "Do you want to leave the secure portal?";
+        };
     </script>
 </body>
 </html>
