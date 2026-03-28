@@ -1,46 +1,108 @@
-document.addEventListener('DOMContentLoaded', () => {
-    const secret = "1234"; // change this
+const secret = "1234";
 
-    const passInput = document.getElementById('passcode');
-    const unlockBtn = document.getElementById('unlockBtn');
-    const lockScreen = document.getElementById('lock-screen');
-    const appContent = document.getElementById('app-content');
-    const errorText = document.getElementById('error');
+const screens = {
+    lock: document.getElementById("lock"),
+    hack: document.getElementById("hack"),
+    face: document.getElementById("faceScreen"),
+    profile: document.getElementById("profileSetup"),
+    dashboard: document.getElementById("dashboard")
+};
 
-    function checkAccess() {
-        const code = passInput.value;
+const pin = document.getElementById("pin");
+const error = document.getElementById("error");
 
-        if (code === secret) {
-            // Close keyboard on mobile
-            passInput.blur();
+/* SWITCH SCREEN */
+function show(screen) {
+    Object.values(screens).forEach(s => s.classList.remove("active"));
+    screen.classList.add("active");
+}
 
-            // Smooth fade out
-            lockScreen.style.opacity = '0';
-
-            setTimeout(() => {
-                lockScreen.style.display = 'none';
-                appContent.style.display = 'block';
-            }, 200);
-
+/* PIN INPUT */
+pin.addEventListener("input", () => {
+    if (pin.value.length === 4) {
+        if (pin.value === secret) {
+            startSystem();
         } else {
-            errorText.style.display = 'block';
-            passInput.value = '';
+            error.innerText = "ACCESS DENIED";
+            pin.value = "";
         }
     }
-
-    // Button click
-    unlockBtn.addEventListener('click', checkAccess);
-
-    // Enter key
-    passInput.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') checkAccess();
-    });
-
-    // Hide error when typing again
-    passInput.addEventListener('input', () => {
-        errorText.style.display = 'none';
-    });
-
-    // Auto focus
-    passInput.focus();
 });
+
+/* START */
+function startSystem() {
+    document.documentElement.requestFullscreen().catch(()=>{});
+    show(screens.hack);
+    startHack();
+}
+
+/* HACK */
+function startHack() {
+    let time = 60;
+    const log = document.getElementById("log");
+
+    const lines = [
+        "> Establishing secure tunnel...",
+        "> Injecting exploit...",
+        "> Bypassing authentication...",
+        "> Masking identity...",
+        "> Access granted..."
+    ];
+
+    let i = 0;
+
+    const logInt = setInterval(() => {
+        if (i < lines.length) {
+            log.innerHTML += lines[i] + "<br>";
+            i++;
+        } else clearInterval(logInt);
+    }, 2000);
+
+    const timer = setInterval(() => {
+        time--;
+        document.getElementById("timer").innerText = time;
+
+        if (time <= 0) {
+            clearInterval(timer);
+            showFace();
+        }
+    }, 1000);
+}
+
+/* FACE */
+function showFace() {
+    show(screens.face);
+
+    setTimeout(() => {
+        const user = localStorage.getItem("profileName");
+        if (user) loadDashboard();
+        else show(screens.profile);
+    }, 3000);
+}
+
+/* PROFILE */
+function saveProfile() {
+    const name = document.getElementById("username").value;
+    if (!name) return;
+
+    localStorage.setItem("profileName", name);
+    loadDashboard();
+}
+
+/* DASHBOARD */
+function loadDashboard() {
+    show(screens.dashboard);
+    const name = localStorage.getItem("profileName");
+    document.getElementById("welcome").innerText = "Welcome, " + name;
+}
+
+/* LOGOUT */
+function logout() {
+    localStorage.removeItem("profileName");
+    location.reload();
+}
+
+/* OPEN SNAP */
+function launchSnap() {
+    window.location.href = "https://web.snapchat.com";
+}
