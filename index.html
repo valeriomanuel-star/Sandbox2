@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Secure Uplink</title>
 
 <style>
@@ -14,18 +14,19 @@ body {
     color:var(--g);
     font-family:monospace;
     overflow:hidden;
+    /* Prevents accidental text selection while "hacking" */
+    -webkit-user-select: none;
+    user-select: none;
 }
 
-/* Canvas for Matrix */
 #matrix-canvas {
     position:fixed;
     top:0; left:0;
     width:100%; height:100%;
     z-index:0;
-    opacity:0.5;
+    opacity:0.4;
 }
 
-/* Screens */
 .screen {
     display:none;
     height:100vh;
@@ -38,50 +39,60 @@ body {
 
 .active { display:flex; }
 
-/* Box */
 .box {
     border:2px solid var(--g);
     padding:30px;
-    background:rgba(0,0,0,0.85);
+    background:rgba(0,0,0,0.9);
     box-shadow:0 0 20px var(--g);
     border-radius:10px;
     text-align:center;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
+    width: 80%;
+    max-width: 300px;
 }
 
-/* Input */
 input {
     font-size:24px;
     padding:10px;
     margin-top:15px;
-    width:140px;
+    width:90%;
     text-align:center;
     background:black;
     border:1px solid var(--g);
     color:var(--g);
+    outline: none;
 }
 
-/* Button */
 button {
-    margin-top:10px;
-    padding:10px 30px;
+    margin-top:20px;
+    padding:12px 30px;
     background:black;
     border:1px solid var(--g);
     color:var(--g);
     cursor:pointer;
-    align-self:center;
+    width: 100%;
+    font-weight: bold;
 }
 
-/* Face ID */
 #face {
     width:120px;
     height:120px;
     border:3px solid var(--g);
     border-radius:50%;
     animation:pulse 1.5s infinite;
+    position: relative;
 }
+
+/* Added a scanning line to the Face ID */
+#face::after {
+    content: "";
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 2px;
+    background: var(--g);
+    animation: faceScan 2s infinite linear;
+}
+
+@keyframes faceScan { 0% { top: 0; } 50% { top: 100%; } 100% { top: 0; } }
 
 @keyframes pulse {
     0% { box-shadow:0 0 5px var(--g); }
@@ -89,7 +100,6 @@ button {
     100% { box-shadow:0 0 5px var(--g); }
 }
 
-/* Hack log */
 #log {
     width:80%;
     max-width:400px;
@@ -98,7 +108,6 @@ button {
     margin-bottom:20px;
 }
 
-/* Dashboard buttons */
 .dashboard-btn {
     margin:10px 0;
     padding:12px 20px;
@@ -108,7 +117,7 @@ button {
     font-weight:bold;
     color:black;
     cursor:pointer;
-    width:200px;
+    width:100%;
 }
 </style>
 </head>
@@ -117,49 +126,43 @@ button {
 
 <canvas id="matrix-canvas"></canvas>
 
-<!-- LOCK SCREEN -->
 <div id="lock" class="screen active">
     <div class="box">
         <h2>SECURE_UPLINK</h2>
-        <input id="pin" maxlength="4" placeholder="PIN">
+        <input id="pin" maxlength="4" placeholder="PIN" inputmode="numeric" type="password">
         <button id="unlockBtn">Unlock</button>
-        <p id="error"></p>
+        <p id="error" style="color: red; font-size: 12px; margin-top: 10px;"></p>
     </div>
 </div>
 
-<!-- HACK SEQUENCE -->
 <div id="hack" class="screen">
     <div id="log"></div>
     <h3>BYPASSING FIREWALL: <span id="timer">60</span>s</h3>
 </div>
 
-<!-- FACE ID -->
 <div id="faceScreen" class="screen">
     <div id="face"></div>
-    <p>Scanning Face...</p>
+    <p style="margin-top: 20px;">Scanning Biometrics...</p>
 </div>
 
-<!-- PROFILE SETUP -->
 <div id="profileSetup" class="screen">
     <div class="box">
-        <h2>CREATE PROFILE</h2>
-        <input id="username" placeholder="Username">
-        <button onclick="saveProfile()">ENTER</button>
+        <h2>NEW OPERATOR</h2>
+        <input id="username" placeholder="Username" spellcheck="false">
+        <button onclick="saveProfile()">INITIALIZE</button>
     </div>
 </div>
 
-<!-- DASHBOARD -->
 <div id="dashboard" class="screen">
-    <h2>SECURE SYSTEM</h2>
-    <p id="welcome"></p>
-    <button class="dashboard-btn" onclick="window.open('https://accounts.snapchat.com/v2/login', '_blank')">Open Snapchat Web</button>
-    <a href="snapchat://" style="display:block; margin-top:10px; color:#666; text-decoration:none; font-size:14px;">Open Snapchat App</a>
-    <button class="dashboard-btn" onclick="logout()">Logout</button>
+    <div class="box">
+        <h2 id="welcome">Welcome</h2>
+        <button class="dashboard-btn" onclick="window.location.href='https://web.snapchat.com'">Open Snapchat Web</button>
+        <button class="dashboard-btn" style="background:transparent; color:var(--g); border: 1px solid var(--g);" onclick="logout()">Logout</button>
+    </div>
 </div>
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-
     const secret = "1234";
 
     const screens = {
@@ -178,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pin.value === secret) {
             startSystem();
         } else {
-            error.innerText = "ACCESS DENIED";
+            error.innerText = "ACCESS_DENIED";
             pin.value = "";
         }
     }
@@ -202,10 +205,10 @@ document.addEventListener("DOMContentLoaded", () => {
         log.innerHTML="";
         const lines = [
             "> Establishing secure tunnel...",
-            "> Injecting exploit...",
-            "> Bypassing authentication...",
-            "> Masking identity...",
-            "> Access granted..."
+            "> Overriding Parkville Node...",
+            "> Bypassing BMS Firewall...",
+            "> Masking digital signature...",
+            "> Access granted."
         ];
         let i=0;
         const logInterval = setInterval(()=>{
@@ -238,7 +241,7 @@ document.addEventListener("DOMContentLoaded", () => {
     function loadDashboard(){
         show(screens.dashboard);
         const name = localStorage.getItem("profileName");
-        document.getElementById("welcome").innerText="Welcome, "+name;
+        document.getElementById("welcome").innerText="Welcome, "+ name.toUpperCase();
     }
 
     window.logout=function(){
@@ -249,12 +252,18 @@ document.addEventListener("DOMContentLoaded", () => {
     // ===== MATRIX EFFECT =====
     const canvas=document.getElementById("matrix-canvas");
     const ctx=canvas.getContext("2d");
-    canvas.width=window.innerWidth;
-    canvas.height=window.innerHeight;
-    const letters="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    
+    function resizeCanvas() {
+        canvas.width=window.innerWidth;
+        canvas.height=window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    const letters="日Hｱﾐﾂﾃﾆﾊﾐﾋｰｳｼﾅﾓﾆｻﾜﾂｵﾘｱﾎﾃﾏｹﾒｴｶｷﾑﾕﾗﾙﾚﾛｦﾝ0123456789";
     const fontSize=16;
-    const columns=Math.floor(canvas.width/fontSize);
-    const drops=Array(columns).fill(1);
+    let columns=Math.floor(canvas.width/fontSize);
+    let drops=Array(columns).fill(1);
 
     function drawMatrix(){
         ctx.fillStyle="rgba(0,0,0,0.05)";
@@ -270,7 +279,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     setInterval(drawMatrix,35);
-
 });
 </script>
 
