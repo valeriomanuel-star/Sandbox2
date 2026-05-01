@@ -13,9 +13,9 @@
       "sizes": "192x192"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "https://manuel-fin.web.app/",
   "background_color": "#0D0208",
   "display": "standalone",
-  "scope": "./",
+  "scope": "/",
   "theme_color": "#00FF41"
 }
